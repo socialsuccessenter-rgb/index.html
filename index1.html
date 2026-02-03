@@ -1,146 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn Bot Simple</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Earn Bot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #0e1621; color: white; font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center; }
-        .header { background: #17212b; padding: 30px; border-bottom: 2px solid #0088cc; }
-        .balance-text { font-size: 14px; color: #8e99a2; }
-        .balance-amount { font-size: 40px; color: #fbbf24; font-weight: bold; margin-top: 5px; }
+        body { background-color: #0e1621; color: white; font-family: sans-serif; margin: 0; padding: 0; }
+        .header { background: #17212b; padding: 25px; text-align: center; border-bottom: 2px solid #0088cc; }
+        .bal-val { font-size: 35px; color: #fbbf24; font-weight: bold; }
+        .page { padding: 20px; padding-bottom: 100px; display: none; }
+        .active { display: block !important; }
+        .card { background: #1c2733; padding: 20px; border-radius: 12px; border: 1px solid #2b3949; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 15px; background: #0088cc; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
         
-        .main-content { padding: 20px; }
-        .task-card { background: #1c2733; padding: 20px; border-radius: 15px; border: 1px solid #2b3949; margin-bottom: 20px; }
-        
-        .btn { display: block; width: 100%; padding: 15px; background: #0088cc; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; text-decoration: none; margin-top: 10px; }
-        .btn-green { background: #2ed573; }
-        
-        /* Ad Timer Screen */
-        #ad-box { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
-        #timer-num { font-size: 70px; color: #0088cc; font-weight: bold; }
-        
-        /* Navigation Buttons at Bottom */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #17212b; display: flex; border-top: 1px solid #2b3949; }
-        .nav-item { flex: 1; padding: 20px; color: white; font-weight: bold; cursor: pointer; border: 0.5px solid #2b3949; }
-        .active-nav { background: #0088cc; }
-        
-        .page { display: none; padding-bottom: 100px; }
-        .show { display: block; }
+        /* Bottom Menu */
+        .navbar { position: fixed; bottom: 0; width: 100%; background: #17212b; display: flex; border-top: 1px solid #2b3949; z-index: 100; }
+        .nav-item { flex: 1; padding: 20px 0; text-align: center; color: #8e99a2; font-weight: bold; cursor: pointer; }
+        .nav-active { color: #0088cc; border-top: 3px solid #0088cc; }
+
+        /* Timer Screen */
+        #timer-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="balance-text">আপনার মোট ব্যালেন্স</div>
-        <div class="balance-amount" id="user-balance">৳ 0.00</div>
+        <p>ব্যালেন্স</p>
+        <div class="bal-val" id="user-bal">৳ 0.00</div>
     </div>
 
-    <div id="ad-box">
-        <div id="timer-num">15</div>
-        <p>অ্যাড দেখা হচ্ছে, অপেক্ষা করুন...</p>
-        <button id="claim-btn" class="btn btn-green" style="display:none; width: 80%;" onclick="addMoney()">টাকা সংগ্রহ করুন</button>
-    </div>
-
-    <div class="main-content">
-        <div id="home-page" class="page show">
-            <div class="task-card">
-                <h2>রেফার লিঙ্ক</h2>
-                <p>বন্ধুদের ইনভাইট করে আয় করুন</p>
-                <button class="btn" onclick="copyLink()">লিঙ্ক কপি করুন</button>
-            </div>
-        </div>
-
-        <div id="task-page" class="page">
-            <div class="task-card">
-                <h2>ভিডিও অ্যাড</h2>
-                <p>৳ ৫.০০ পাবেন (১৫ সেকেন্ড)</p>
-                <button class="btn" onclick="startAd()">অ্যাড দেখুন</button>
-            </div>
-            
-            <div class="task-card" id="yt-card">
-                <h2>YouTube টাস্ক</h2>
-                <p>৳ ৫০.০০ পাবেন</p>
-                <button class="btn" style="background: red;" onclick="openSocial('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe</button>
-                <button id="yt-verify" class="btn btn-green" style="display:none;" onclick="collectSocial('yt', 50)">টাকা নিন</button>
-            </div>
-        </div>
-
-        <div id="withdraw-page" class="page">
-            <div class="task-card">
-                <h2>উইথড্র</h2>
-                <p>মিনিমাম ৫০০ টাকা</p>
-                <button class="btn" onclick="alert('আপনার ব্যালেন্স কম!')">সাবমিট করুন</button>
-            </div>
+    <div id="p1" class="page active">
+        <div class="card">
+            <h3>Invite & Earn</h3>
+            <p>প্রতি রেফারে ১০ টাকা পাবেন।</p>
+            <button class="btn" onclick="copyLink()">Invite Link</button>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active-nav" id="n1" onclick="showPage('home-page', 'n1')">HOME</div>
-        <div class="nav-item" id="n2" onclick="showPage('task-page', 'n2')">TASK</div>
-        <div class="nav-item" id="n3" onclick="showPage('withdraw-page', 'n3')">CASH OUT</div>
+    <div id="p2" class="page">
+        <div class="card">
+            <h3>Video Ad</h3>
+            <p>৳ ৫.০০ (১৫ সেকেন্ড)</p>
+            <button class="btn" onclick="watchAd()">Watch Ad</button>
+        </div>
+        <div class="card" id="yt-sec">
+            <h3>YouTube Task</h3>
+            <p>৳ ৫০.০০ পাবেন</p>
+            <button class="btn" style="background: red;" onclick="goSocial('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe</button>
+            <button id="yt-verify" class="btn" style="display:none; background: #2ed573;" onclick="claimTask('yt', 50)">Claim Money</button>
+        </div>
+    </div>
+
+    <div id="p3" class="page">
+        <div class="card">
+            <h3>Withdraw</h3>
+            <p>মিনিমাম ৫০০ টাকা হলে উইথড্র করতে পারবেন।</p>
+            <button class="btn" onclick="tg.showAlert('ব্যালেন্স পর্যাপ্ত নয়!')">Request Withdraw</button>
+        </div>
+    </div>
+
+    <div id="timer-screen">
+        <h1 id="count" style="font-size: 80px; color: #0088cc;">15</h1>
+        <p>অ্যাড দেখা হচ্ছে...</p>
+        <button id="reward-btn" class="btn" style="display:none; width: 200px; background: #2ed573;" onclick="addReward()">বোনাস নিন</button>
+    </div>
+
+    <div class="navbar">
+        <div class="nav-item nav-active" id="n1" onclick="tab('p1','n1')">HOME</div>
+        <div class="nav-item" id="n2" onclick="tab('p2','n2')">TASK</div>
+        <div class="nav-item" id="n3" onclick="tab('p3','n3')">CASH</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        let db = JSON.parse(localStorage.getItem('bot_db_v5')) || { balance: 0, yt: false };
 
-        let userData = JSON.parse(localStorage.getItem('panda_simple_db')) || { bal: 0, yt: false };
-
-        function updateUI() {
-            document.getElementById('user-balance').innerText = "৳ " + userData.bal.toFixed(2);
-            if(userData.yt) document.getElementById('yt-card').style.display = 'none';
-            localStorage.setItem('panda_simple_db', JSON.stringify(userData));
+        function update() {
+            document.getElementById('user-bal').innerText = "৳ " + db.balance.toFixed(2);
+            if(db.yt) document.getElementById('yt-sec').style.display = 'none';
+            localStorage.setItem('bot_db_v5', JSON.stringify(db));
         }
 
-        function showPage(pageId, navId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('show'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById(pageId).classList.add('show');
-            document.getElementById(navId).classList.add('active-nav');
+        function tab(pid, nid) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+            document.getElementById(pid).classList.add('active');
+            document.getElementById(nid).classList.add('nav-active');
         }
 
-        function startAd() {
+        function watchAd() {
             tg.openLink("https://otieu.com/4/10557505");
-            document.getElementById('ad-box').style.display = 'flex';
-            let sec = 15;
+            document.getElementById('timer-screen').style.display = 'flex';
+            let s = 15;
             let timer = setInterval(() => {
-                sec--;
-                document.getElementById('timer-num').innerText = sec;
-                if(sec <= 0) {
+                s--;
+                document.getElementById('count').innerText = s;
+                if(s <= 0) {
                     clearInterval(timer);
-                    document.getElementById('timer-num').innerText = "OK";
-                    document.getElementById('claim-btn').style.display = 'block';
+                    document.getElementById('count').style.display = 'none';
+                    document.getElementById('reward-btn').style.display = 'block';
                 }
             }, 1000);
         }
 
-        function addMoney() {
-            userData.bal += 5;
-            updateUI();
-            document.getElementById('ad-box').style.display = 'none';
+        function addReward() {
+            db.balance += 5; update();
+            document.getElementById('timer-screen').style.display = 'none';
             tg.showAlert("৫ টাকা যোগ হয়েছে!");
         }
 
-        function openSocial(url, id) {
+        function goSocial(url, id) {
             tg.openLink(url);
             setTimeout(() => { document.getElementById(id + '-verify').style.display = 'block'; }, 8000);
         }
 
-        function collectSocial(type, amt) {
-            userData.bal += amt;
-            if(type === 'yt') userData.yt = true;
-            updateUI();
-            tg.showAlert("টাকা যোগ হয়েছে!");
+        function claimTask(type, amt) {
+            db.balance += amt; if(type==='yt') db.yt = true;
+            update(); tg.showAlert("৳"+amt+" যোগ হয়েছে!");
         }
 
         function copyLink() {
-            let id = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
+            let id = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "user";
             tg.openLink("https://t.me/share/url?url=https://t.me/Red_Chilii_bot?start=" + id);
         }
 
-        updateUI();
+        update();
     </script>
 </body>
 </html>
