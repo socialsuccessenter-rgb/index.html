@@ -9,10 +9,10 @@
         :root { --primary: #ff4757; --bg: #0e1621; --card: #17212b; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; user-select: none; }
         
-        .header { background: linear-gradient(135deg, #ff4757, #ff6b81); padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #ff4757, #ff6b81); padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
         .bal-val { font-size: 40px; font-weight: bold; margin-top: 5px; color: #fff; }
 
-        /* Panda Animation Style */
+        /* --- Panda Animation --- */
         .panda-box { text-align: center; margin-bottom: 10px; }
         .panda-img { width: 80px; height: 80px; animation: bounce 2s infinite ease-in-out; }
         @keyframes bounce {
@@ -30,22 +30,25 @@
         .card-info h4 { margin: 0; color: #ff4757; }
         .card-info p { margin: 5px 0 0; font-size: 12px; color: #8e99a2; }
 
-        .btn-action { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-action:disabled { background: #444; cursor: not-allowed; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-claim { background: #2ed573; margin-top: 10px; width: 100%; display: none; }
 
+        /* --- Full Screen Ad Overlay --- */
+        #ad-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; flex-direction: column; }
+        #ad-frame { width: 100%; height: 100%; border: none; }
+        .floating-timer { position: fixed; top: 15px; right: 15px; background: rgba(255, 71, 87, 0.9); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10000; border: 2px solid #fff; }
+
+        /* --- Instruction Modal --- */
+        #instruction-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10002; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 85%; text-align: center; border: 1px solid var(--primary); }
+
+        #collect-btn-container { position: fixed; bottom: 20px; width: 100%; display: none; justify-content: center; z-index: 10001; }
+        
         .navbar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; border-top: 1px solid #2b3949; height: 70px; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #8e99a2; cursor: pointer; }
         .nav-active { color: var(--primary); }
 
-        #ad-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; flex-direction: column; }
-        #ad-frame { width: 100%; height: 75%; border: none; background: #fff; }
-        .ad-timer-bar { height: 25%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0e1621; text-align: center; padding: 10px; }
-        
-        input, select { width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #2b3949; background:#0e1621; color:white; box-sizing: border-box; font-size: 14px; outline: none; }
-        .warning { color: #ff4757; font-size: 13px; margin-top: 10px; font-weight: bold; text-align: center; border: 1px dashed #ff4757; padding: 10px; border-radius: 10px; background: rgba(255, 71, 87, 0.05); }
-        .captcha-note { color: #2ed573; font-size: 15px; font-weight: bold; margin-bottom: 5px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        input, select { width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #2b3949; background:#0e1621; color:white; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
@@ -66,15 +69,14 @@
                     <p>মোট রেফার: <b id="ref-count">0</b> জন</p>
                 </div>
                 <button class="btn-action" style="margin-top:15px; width:100%" onclick="copyRef()">Invite Friends (Copy Link)</button>
-                <div class="warning">⚠️ উইথড্র করার জন্য ন্যূনতম ১০ জন রেফার করা বাধ্যতামূলক।</div>
-                <p id="ref-msg" style="text-align:center; font-size:12px; margin-top:10px;"></p>
+                <p id="ref-msg" style="text-align:center; font-size:12px; margin-top:10px; color: #ff4757;">উইথড্রর জন্য ১০ জন রেফার প্রয়োজন।</p>
             </div>
         </div>
 
         <div id="task" class="page">
             <div class="card flex-card">
                 <div class="card-info"><h4>ভিডিও অ্যাড</h4><p>রিওয়ার্ড: ৳ ৫.০০</p></div>
-                <button class="btn-action" onclick="startInAppAd()">Watch Ad</button>
+                <button class="btn-action" onclick="showInstruction()">Watch Ad</button>
             </div>
 
             <div class="card" id="yt-sec">
@@ -109,16 +111,20 @@
         </div>
     </div>
 
+    <div id="instruction-modal">
+        <div class="modal-content">
+            <h3 style="color: #ff4757; margin-top: 0;">⚠️ নির্দেশনা পড়ুন</h3>
+            <p style="font-size: 14px; line-height: 1.5;">অ্যাড লোড হওয়ার পর যদি কোনো <b>ক্যাপচা (Captcha)</b> আসে, তবে সেটি পূরণ করুন। এরপর কোনো অনুমতি (Permission) চাইলে তাতে সম্মতি দিন। সঠিক ভাবে অ্যাড না দেখলে টাকা পাবেন না।</p>
+            <button class="btn-action" style="width: 100%; padding: 15px; margin-top: 10px;" onclick="startInAppAd()">আমি বুঝেছি, অ্যাড শুরু করুন</button>
+            <p style="font-size: 11px; margin-top: 10px; color: #8e99a2; cursor: pointer;" onclick="closeModal()">ফিরে যান</p>
+        </div>
+    </div>
+
     <div id="ad-overlay">
+        <div id="timer-display" class="floating-timer">25</div>
         <iframe id="ad-frame" src=""></iframe>
-        <div class="ad-timer-bar">
-            <div id="timer-box">
-                <div class="captcha-note">⚠️ ক্যাপচা ভেরিফাই করুন নাহলে টাকা পাবেন না</div>
-                <div id="timer" style="font-size: 45px; color: #ff4757; font-weight: bold;">20</div>
-                <p style="margin: 5px 0; font-size:14px; color:#fff;">অ্যাড চলাকালীন ব্যাক করবেন না</p>
-                <p style="font-size:11px; color:#8e99a2;">অন্য কোথাও নিয়ে গেলে ব্যাক করে এখানে অপেক্ষা করুন</p>
-            </div>
-            <button id="reward-btn" class="btn-action" style="display:none; width:85%; background:#2ed573; padding: 15px;" onclick="collectReward()">টাকা সংগ্রহ করুন</button>
+        <div id="collect-btn-container">
+            <button class="btn-action" style="background:#2ed573; padding: 15px 40px;" onclick="collectReward()">💰 টাকা সংগ্রহ করুন</button>
         </div>
     </div>
 
@@ -132,7 +138,7 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        let db = JSON.parse(localStorage.getItem('panda_earning_db')) || { bal: 0, refs: 0, yt: false, fb: false };
+        let db = JSON.parse(localStorage.getItem('panda_db_v4')) || { bal: 0, refs: 0, yt: false, fb: false };
 
         function updateUI() {
             document.getElementById('main-bal').innerText = "৳ " + db.bal.toFixed(2);
@@ -145,40 +151,50 @@
                 document.getElementById('ref-msg').style.color = "#ff4757";
             } else {
                 withdrawBtn.disabled = false;
-                document.getElementById('ref-msg').innerText = "আপনার ১০ জন রেফার লক্ষ্য পূর্ণ হয়েছে। 🐼";
+                document.getElementById('ref-msg').innerText = "আপনার ১০ জন রেফার পূর্ণ হয়েছে! 🐼";
                 document.getElementById('ref-msg').style.color = "#2ed573";
             }
 
             if(db.yt) document.getElementById('yt-sec').style.display = 'none';
             if(db.fb) document.getElementById('fb-sec').style.display = 'none';
 
-            localStorage.setItem('panda_earning_db', JSON.stringify(db));
+            localStorage.setItem('panda_db_v4', JSON.stringify(db));
         }
 
-        function nav(page, btn) {
+        function nav(page, btnId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
             document.getElementById(page).classList.add('active');
-            document.getElementById(btn).classList.add('nav-active');
+            document.getElementById(btnId).classList.add('nav-active');
+        }
+
+        function showInstruction() {
+            document.getElementById('instruction-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('instruction-modal').style.display = 'none';
         }
 
         function startInAppAd() {
-            const adUrl = "https://otieu.com/4/10557505";
+            closeModal();
+            const adUrl = "https://otieu.com/4/10557505"; 
             document.getElementById('ad-frame').src = adUrl;
             document.getElementById('ad-overlay').style.display = 'flex';
-            document.getElementById('timer-box').style.display = 'block';
-            document.getElementById('reward-btn').style.display = 'none';
+            document.getElementById('collect-btn-container').style.display = 'none';
+            document.getElementById('timer-display').style.display = 'flex';
             
-            let s = 20;
-            let timerEl = document.getElementById('timer');
+            let s = 25;
+            let timerEl = document.getElementById('timer-display');
+            timerEl.innerText = s;
             
             let inter = setInterval(() => {
                 s--;
                 timerEl.innerText = s;
                 if(s <= 0) {
                     clearInterval(inter);
-                    document.getElementById('timer-box').style.display = 'none';
-                    document.getElementById('reward-btn').style.display = 'block';
+                    timerEl.style.display = 'none';
+                    document.getElementById('collect-btn-container').style.display = 'flex';
                     tg.HapticFeedback.notificationOccurred('success');
                 }
             }, 1000);
@@ -189,7 +205,7 @@
             updateUI();
             document.getElementById('ad-overlay').style.display = 'none';
             document.getElementById('ad-frame').src = "";
-            tg.showAlert("অভিনন্দন! ৫ টাকা আপনার অ্যাকাউন্টে জমা হয়েছে। 🐼");
+            tg.showAlert("অভিনন্দন! ৫ টাকা যোগ হয়েছে। 🐼");
         }
 
         function goSocial(url, type) {
@@ -202,25 +218,25 @@
             if(type === 'yt') db.yt = true;
             if(type === 'fb') db.fb = true;
             updateUI(); 
-            tg.showAlert("পান্ডা বোনাস সফলভাবে জমা হয়েছে!");
+            tg.showAlert("টাস্ক বোনাস সফলভাবে জমা হয়েছে!");
         }
 
         function copyRef() {
-            let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
-            let link = "https://t.me/Red_Chilii_bot?start=" + userId;
+            let link = "https://t.me/Taka_Incom_Ads_bot?start=panda";
             const el = document.createElement('textarea');
             el.value = link;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            tg.showAlert("রেফার লিঙ্ক কপি হয়েছে!");
+            tg.showAlert("Panda রেফার লিঙ্ক কপি হয়েছে!");
         }
 
         function handleWithdraw() {
             let amt = document.getElementById('w-amt').value;
-            if(amt < 500) return tg.showAlert("মিনিমাম ৫০০ টাকা হতে হবে!");
-            tg.showAlert("রিকোয়েস্ট সফল! পান্ডা টিম আপনার রেফার চেক করে পেমেন্ট করবে।");
+            let phn = document.getElementById('w-phn').value;
+            if(!phn || amt < 500) return tg.showAlert("সঠিক নম্বর দিন এবং ন্যূনতম ৫০০ টাকা উইথড্র করুন।");
+            tg.showAlert("আপনার রিকোয়েস্ট গ্রহণ করা হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
         }
 
         updateUI();
