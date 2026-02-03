@@ -3,54 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Ads Bot</title>
+    <title>Anti-Cheat Ads Bot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --primary: #0088cc; --bg: #0e1621; --card: #17212b; --accent: #fbbf24; --success: #2ed573; --danger: #ff4757; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); color: white; overflow: hidden; padding-bottom: 80px; }
         
-        /* Header & Balance */
+        /* Anti-Cheat Overlay */
+        #cheat-guard { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 30000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .timer-circle { width: 120px; height: 120px; border: 5px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; box-shadow: 0 0 20px var(--primary); }
+        
+        /* Other Styles */
         .header { padding: 20px; text-align: center; background: var(--card); border-bottom: 1px solid #242f3d; }
         .balance-card { background: #1c2733; padding: 15px; border-radius: 15px; border: 1px solid #2b3949; margin-top: 10px; }
         .balance-amount { font-size: 30px; color: var(--accent); font-weight: bold; }
-
-        /* Pages */
         .content { padding: 20px; height: calc(100vh - 200px); overflow-y: auto; }
         .page { display: none; }
         .page.active { display: block; }
         .task-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #242f3d; }
-        
         .btn { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; background: var(--primary); width: 100%; margin-top: 8px; }
-        .btn-check { background: var(--success); display: none; }
-        .btn-yt { background: #ff0000; }
-        .btn-fb { background: #1877f2; }
-        
-        input, select { width: 100%; padding: 12px; background: #0e1621; border: 1px solid #2b3949; color: white; border-radius: 8px; margin-bottom: 10px; outline: none; }
-        label { display: block; margin-bottom: 5px; font-size: 13px; color: #8e99a2; }
-
-        /* Navigation */
         .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--card); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #242f3d; }
         .nav-item { color: #8e99a2; font-size: 11px; display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--primary); }
+        select, input { width: 100%; padding: 12px; background: #0e1621; border: 1px solid #2b3949; color: white; border-radius: 8px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
+    <div id="cheat-guard">
+        <div class="timer-circle" id="circle-timer">15</div>
+        <h3 id="guard-status">অ্যাড দেখা হচ্ছে...</h3>
+        <p style="color: #8e99a2; font-size: 13px; margin-top: 10px;">সতর্কতা: অ্যাড দেখা শেষ না করে এখানে ফিরে আসলে টাইমার থেমে যাবে!</p>
+        <button id="claim-btn" class="btn" style="display:none; background:var(--success); width:80%;" onclick="claimMoney()">টাকা সংগ্রহ করুন</button>
+    </div>
+
     <div class="header">
         <h3 id="user-name">Welcome</h3>
         <div class="balance-card">
-            <p style="font-size: 13px; color: #8e99a2;">আপনার ব্যালেন্স</p>
             <div class="balance-amount" id="balance">৳ 0.00</div>
-            <p id="stats" style="font-size: 11px; margin-top: 5px; color: #8e99a2;">অ্যাড: 0/10 | রেফার: 0</p>
+            <p id="stats" style="font-size: 11px; color: #8e99a2;">অ্যাড: 0/10 | রেফার: 0</p>
         </div>
     </div>
 
     <div class="content">
         <div id="home" class="page active">
             <div class="task-card" style="text-align: center;">
-                <h4 style="color: var(--accent);">Refer & Earn</h4>
-                <p style="margin: 10px 0; font-size: 13px;">প্রতি রেফারে ১০ টাকা বোনাস পান!</p>
+                <h4>Refer & Earn</h4>
                 <button class="btn" onclick="copyRef()">রেফার লিঙ্ক কপি</button>
             </div>
         </div>
@@ -58,44 +57,22 @@
         <div id="task" class="page">
             <div class="task-card">
                 <div style="display:flex; justify-content:space-between"><h4>Premium Ad</h4><b>৳৫</b></div>
-                <button class="btn" onclick="playAd()">বিজ্ঞাপন দেখুন (১৫ সে.)</button>
-            </div>
-            <div class="task-card" id="yt-card">
-                <div style="display:flex; justify-content:space-between"><h4>YouTube Subscribe</h4><b>৳৫০</b></div>
-                <button id="yt-go" class="btn btn-yt" onclick="openSocialLink('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe Channel</button>
-                <button id="yt-check" class="btn btn-check" onclick="verifyTask('yt', 50)">Check Claim</button>
-            </div>
-            <div class="task-card" id="fb-card">
-                <div style="display:flex; justify-content:space-between"><h4>FB Follow</h4><b>৳৩০</b></div>
-                <button id="fb-go" class="btn btn-fb" onclick="openSocialLink('https://www.facebook.com/profile.php?id=61585605224547', 'fb')">Follow Page</button>
-                <button id="fb-check" class="btn btn-check" onclick="verifyTask('fb', 30)">Check Claim</button>
+                <button class="btn" onclick="startAdProcess()">বিজ্ঞাপন দেখুন</button>
             </div>
         </div>
 
         <div id="withdraw" class="page">
             <div class="task-card">
-                <h4 style="margin-bottom:15px;">উইথড্র রিকোয়েস্ট</h4>
-                <label>পেমেন্ট মেথড:</label>
-                <select id="method">
-                    <option value="">-- মেথড বেছে নিন --</option>
-                    <option value="Bkash">বিকাশ (Bkash)</option>
-                    <option value="Nagad">নগদ (Nagad)</option>
-                    <option value="Rocket">রকেট (Rocket)</option>
-                </select>
-                <label>ফোন নাম্বার:</label>
-                <input type="number" id="phone" placeholder="01XXXXXXXXX">
-                <label>টাকার পরিমাণ (মিনিমাম ৫০০):</label>
-                <input type="number" id="amount" placeholder="৫০০">
-                <button class="btn" onclick="withdraw()">সাবমিট করুন</button>
+                <select id="method"><option value="Bkash">Bkash</option><option value="Nagad">Nagad</option><option value="Rocket">Rocket</option></select>
+                <input type="number" id="phone" placeholder="ফোন নাম্বার">
+                <input type="number" id="amount" placeholder="পরিমাণ">
+                <button class="btn" onclick="withdraw()">উইথড্র</button>
             </div>
         </div>
 
         <div id="support" class="page">
             <div class="task-card" style="text-align: center;">
-                <h4>আমাদের সাপোর্ট টিম</h4>
-                <button class="btn" onclick="tg.openLink('https://t.me/Red_Chilii_bot')">Telegram Support</button>
-                <button class="btn btn-yt" onclick="tg.openLink('https://www.youtube.com/@arshoppingmalls')">YouTube Channel</button>
-                <button class="btn btn-fb" onclick="tg.openLink('https://www.facebook.com/profile.php?id=61585605224547')">Facebook Page</button>
+                <button class="btn" onclick="tg.openLink('https://t.me/Red_Chilii_bot')">Support</button>
             </div>
         </div>
     </div>
@@ -110,6 +87,69 @@
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        let db = JSON.parse(localStorage.getItem('anti_cheat_db')) || { bal: 0, ads: 0, refs: 0 };
+        let timerVal = 15;
+        let adActive = false;
+        let timerInterval;
+
+        function updateUI() {
+            document.getElementById('balance').innerText = "৳ " + db.bal.toFixed(2);
+            document.getElementById('stats').innerText = "অ্যাড: " + db.ads + "/10 | রেফার: " + db.refs;
+            localStorage.setItem('anti_cheat_db', JSON.stringify(db));
+        }
+
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function startAdProcess() {
+            if(db.ads >= 10) return alert("লিমিট শেষ!");
+            
+            adActive = true;
+            timerVal = 15;
+            document.getElementById('cheat-guard').style.display = 'flex';
+            document.getElementById('claim-btn').style.display = 'none';
+            document.getElementById('circle-timer').style.display = 'flex';
+            
+            tg.openLink("https://otieu.com/4/10557505"); // আপনার অ্যাড লিঙ্ক
+
+            timerInterval = setInterval(() => {
+                // চেক করবে ইউজার কি অ্যাপের ভেতরে আছে নাকি বাইরে (অ্যাড দেখছে)
+                if (document.visibilityState === 'hidden') {
+                    timerVal--;
+                    document.getElementById('circle-timer').innerText = timerVal;
+                    document.getElementById('guard-status').innerText = "অ্যাড দেখা হচ্ছে...";
+                } else {
+                    document.getElementById('guard-status').innerText = "টাইমার থেমে আছে! অ্যাড উইন্ডোতে ফিরে যান।";
+                }
+
+                if(timerVal <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('guard-status').innerText = "অ্যাড দেখা সম্পন্ন!";
+                    document.getElementById('circle-timer').style.display = 'none';
+                    document.getElementById('claim-btn').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function claimMoney() {
+            db.bal += 5; db.ads += 1;
+            adActive = false;
+            document.getElementById('cheat-guard').style.display = 'none';
+            updateUI();
+            alert("৳৫ যোগ হয়েছে!");
+        }
+
+        // ব্রাউজার যদি সাপোর্ট না করে তাই ব্যাকআপ চেক
+        window.onfocus = function() { if(adActive && timerVal > 0) document.getElementById('guard-status').innerText = "টাইমার থেমে আছে! অ্যাড উইন্ডোতে ফিরে যান।"; };
+
+        updateUI();
+    </script>
+</body>
+</html>
 
         let db = JSON.parse(localStorage.getItem('bot_db_final_v10')) || { bal: 0, ads: 0, refs: 0, yt: false, fb: false };
 
@@ -192,3 +232,4 @@
     </script>
 </body>
 </html>
+
