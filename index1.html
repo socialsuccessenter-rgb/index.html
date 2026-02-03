@@ -6,19 +6,19 @@
     <title>Panda Earning Official</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --primary: #ff4757; --bg: #0e1621; --card: #17212b; }
+        :root { --primary: #ff4757; --bg: #0e1621; --card: #17212b; --success: #2ed573; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; user-select: none; }
         
-        .header { background: linear-gradient(135deg, #ff4757, #ff6b81); padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
-        .bal-val { font-size: 40px; font-weight: bold; margin-top: 5px; color: #fff; }
-
         /* --- Panda Animation --- */
-        .panda-box { text-align: center; margin-bottom: 10px; }
-        .panda-img { width: 80px; height: 80px; animation: bounce 2s infinite ease-in-out; }
-        @keyframes bounce {
+        .header { background: linear-gradient(135deg, #ff4757, #ff6b81); padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .panda-box { margin-bottom: 10px; }
+        .panda-img { width: 80px; height: 80px; animation: pandaBounce 2s infinite ease-in-out; }
+        @keyframes pandaBounce {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
         }
+
+        .bal-val { font-size: 40px; font-weight: bold; margin-top: 5px; color: #fff; }
 
         .content { padding: 20px; padding-bottom: 100px; }
         .page { display: none; }
@@ -27,28 +27,29 @@
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #2b3949; }
         .flex-card { display: flex; justify-content: space-between; align-items: center; }
         
-        .card-info h4 { margin: 0; color: #ff4757; }
+        .card-info h4 { margin: 0; color: var(--primary); }
         .card-info p { margin: 5px 0 0; font-size: 12px; color: #8e99a2; }
 
-        .btn-action { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-claim { background: #2ed573; margin-top: 10px; width: 100%; display: none; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-claim { background: var(--success); margin-top: 10px; width: 100%; display: none; }
 
-        /* --- Full Screen Ad Overlay --- */
+        .progress-container { background: #0e1621; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; border: 1px solid #2b3949; }
+        .progress-bar { background: var(--success); height: 100%; width: 0%; transition: 0.5s; }
+
+        /* Ad Overlay */
         #ad-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; flex-direction: column; }
         #ad-frame { width: 100%; height: 100%; border: none; }
-        .floating-timer { position: fixed; top: 15px; right: 15px; background: rgba(255, 71, 87, 0.9); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10000; border: 2px solid #fff; }
+        .floating-timer { position: fixed; top: 15px; right: 15px; background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10000; border: 2px solid white; }
 
-        /* --- Instruction Modal --- */
-        #instruction-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10002; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 85%; text-align: center; border: 1px solid var(--primary); }
-
-        #collect-btn-container { position: fixed; bottom: 20px; width: 100%; display: none; justify-content: center; z-index: 10001; }
-        
         .navbar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; border-top: 1px solid #2b3949; height: 70px; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: #8e99a2; cursor: pointer; }
         .nav-active { color: var(--primary); }
 
-        input, select { width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #2b3949; background:#0e1621; color:white; box-sizing: border-box; outline: none; }
+        input, select { width:100%; padding:14px; margin-top:10px; border-radius:8px; border:1px solid #2b3949; background:#0e1621; color:white; box-sizing: border-box; }
+        
+        /* Warning Card */
+        .warning-card { border: 1px dashed #ff4757 !important; background: rgba(255, 71, 87, 0.05) !important; }
+        .warning-card p { font-size: 12px; line-height: 1.6; color: #ff6b81; margin: 0; }
     </style>
 </head>
 <body>
@@ -64,19 +65,27 @@
     <div class="content">
         <div id="home" class="page active">
             <div class="card">
+                <h4>📊 আজকের টাস্ক রিপোর্ট</h4>
+                <p style="font-size: 14px;">ভিডিও অ্যাড: <b id="ad-count">0</b>/১০</p>
+                <div class="progress-container">
+                    <div class="progress-bar" id="ad-progress"></div>
+                </div>
+                <p style="font-size: 11px; color: #8e99a2; margin-top: 8px;">প্রতি অ্যাড ৫ টাকা | দৈনিক ১০টি অ্যাড</p>
+            </div>
+            
+            <div class="card">
                 <div class="card-info">
-                    <h4>🐼 Panda Referral Status</h4>
-                    <p>মোট রেফার: <b id="ref-count">0</b> জন</p>
+                    <h4>🐼 রেফার স্ট্যাটাস</h4>
+                    <p>মোট রেফার: <b id="ref-count">0</b> জন (প্রতিটি ১০ টাকা)</p>
                 </div>
                 <button class="btn-action" style="margin-top:15px; width:100%" onclick="copyRef()">Invite Friends (Copy Link)</button>
-                <p id="ref-msg" style="text-align:center; font-size:12px; margin-top:10px; color: #ff4757;">উইথড্রর জন্য ১০ জন রেফার প্রয়োজন।</p>
             </div>
         </div>
 
         <div id="task" class="page">
             <div class="card flex-card">
                 <div class="card-info"><h4>ভিডিও অ্যাড</h4><p>রিওয়ার্ড: ৳ ৫.০০</p></div>
-                <button class="btn-action" onclick="showInstruction()">Watch Ad</button>
+                <button class="btn-action" id="watch-btn" onclick="startAdProcess()">Watch Ad</button>
             </div>
 
             <div class="card" id="yt-sec">
@@ -84,7 +93,7 @@
                     <div class="card-info"><h4>YouTube Subscribe</h4><p>রিওয়ার্ড: ৳ ৫০.০০</p></div>
                     <button class="btn-action" style="background:#ff0000" onclick="goSocial('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe</button>
                 </div>
-                <button id="yt-claim" class="btn-action btn-claim" onclick="claimTask('yt', 50)">টাকা সংগ্রহ করুন</button>
+                <button id="yt-claim" class="btn-action btn-claim" onclick="claimSocial('yt', 50)">টাকা সংগ্রহ করুন</button>
             </div>
 
             <div class="card" id="fb-sec">
@@ -92,7 +101,7 @@
                     <div class="card-info"><h4>Facebook Follow</h4><p>রিওয়ার্ড: ৳ ৩০.০০</p></div>
                     <button class="btn-action" style="background:#1877f2" onclick="goSocial('https://www.facebook.com/profile.php?id=61585605224547', 'fb')">Follow</button>
                 </div>
-                <button id="fb-claim" class="btn-action btn-claim" onclick="claimTask('fb', 30)">টাকা সংগ্রহ করুন</button>
+                <button id="fb-claim" class="btn-action btn-claim" onclick="claimSocial('fb', 30)">টাকা সংগ্রহ করুন</button>
             </div>
         </div>
 
@@ -100,31 +109,31 @@
             <div class="card">
                 <h4>Cash Out</h4>
                 <select id="method">
-                    <option value="bkash">Bkash (বিকাশ)</option>
-                    <option value="nagad">Nagad (নগদ)</option>
-                    <option value="rocket">Rocket (রকেট)</option>
+                    <option value="Bkash">বিকাশ (Bkash)</option>
+                    <option value="Nagad">নগদ (Nagad)</option>
+                    <option value="Rocket">রকেট (Rocket)</option>
                 </select>
-                <input type="number" id="w-amt" placeholder="টাকার পরিমাণ">
+                <input type="number" id="w-amt" placeholder="টাকার পরিমাণ (মিন. ৫০০)">
                 <input type="text" id="w-phn" placeholder="অ্যাকাউন্ট নম্বর">
-                <button id="withdraw-btn" class="btn-action" style="margin-top:20px; width:100%" onclick="handleWithdraw()">উইথড্র রিকোয়েস্ট</button>
+                <button class="btn-action" style="margin-top:20px; width:100%" onclick="handleWithdraw()">উইথড্র রিকোয়েস্ট</button>
             </div>
-        </div>
-    </div>
 
-    <div id="instruction-modal">
-        <div class="modal-content">
-            <h3 style="color: #ff4757; margin-top: 0;">⚠️ নির্দেশনা পড়ুন</h3>
-            <p style="font-size: 14px; line-height: 1.5;">অ্যাড লোড হওয়ার পর যদি কোনো <b>ক্যাপচা (Captcha)</b> আসে, তবে সেটি পূরণ করুন। এরপর কোনো অনুমতি (Permission) চাইলে তাতে সম্মতি দিন। সঠিক ভাবে অ্যাড না দেখলে টাকা পাবেন না।</p>
-            <button class="btn-action" style="width: 100%; padding: 15px; margin-top: 10px;" onclick="startInAppAd()">আমি বুঝেছি, অ্যাড শুরু করুন</button>
-            <p style="font-size: 11px; margin-top: 10px; color: #8e99a2; cursor: pointer;" onclick="closeModal()">ফিরে যান</p>
+            <div class="card warning-card">
+                <p>
+                    ⚠️ <b>উইথড্র করার শর্তাবলী:</b><br>
+                    • আপনার একাউন্টে কমপক্ষে ৫০০ টাকা থাকতে হবে।<br>
+                    • উইথড্র সফল করতে অন্তত ১০ জন রেফার থাকা বাধ্যতামূলক।<br>
+                    • পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ ঘণ্টার মধ্যে টাকা পৌঁছে যাবে।
+                </p>
+            </div>
         </div>
     </div>
 
     <div id="ad-overlay">
         <div id="timer-display" class="floating-timer">25</div>
         <iframe id="ad-frame" src=""></iframe>
-        <div id="collect-btn-container">
-            <button class="btn-action" style="background:#2ed573; padding: 15px 40px;" onclick="collectReward()">💰 টাকা সংগ্রহ করুন</button>
+        <div id="collect-btn-container" style="position:fixed; bottom:20px; width:100%; display:none; justify-content:center;">
+            <button class="btn-action" style="background:var(--success); padding: 15px 40px;" onclick="finishAd()">💰 বোনাস নিন</button>
         </div>
     </div>
 
@@ -138,27 +147,27 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        let db = JSON.parse(localStorage.getItem('panda_db_v4')) || { bal: 0, refs: 0, yt: false, fb: false };
+        let db = JSON.parse(localStorage.getItem('panda_v12')) || { 
+            bal: 0, refs: 0, lastRefs: 0, ads: 0, yt: false, fb: false 
+        };
 
         function updateUI() {
+            if(db.refs > db.lastRefs) {
+                db.bal += (db.refs - db.lastRefs) * 10;
+                db.lastRefs = db.refs;
+            }
             document.getElementById('main-bal').innerText = "৳ " + db.bal.toFixed(2);
             document.getElementById('ref-count').innerText = db.refs;
-            
-            let withdrawBtn = document.getElementById('withdraw-btn');
-            if(db.refs < 10) {
-                withdrawBtn.disabled = true;
-                document.getElementById('ref-msg').innerText = "উইথড্রর জন্য আরও " + (10 - db.refs) + " জন রেফার প্রয়োজন।";
-                document.getElementById('ref-msg').style.color = "#ff4757";
-            } else {
-                withdrawBtn.disabled = false;
-                document.getElementById('ref-msg').innerText = "আপনার ১০ জন রেফার পূর্ণ হয়েছে! 🐼";
-                document.getElementById('ref-msg').style.color = "#2ed573";
-            }
+            document.getElementById('ad-count').innerText = db.ads;
+            document.getElementById('ad-progress').style.width = (db.ads / 10 * 100) + "%";
 
+            if(db.ads >= 10) {
+                let b = document.getElementById('watch-btn');
+                b.disabled = true; b.innerText = "লিমিট শেষ"; b.style.background = "#2b3949";
+            }
             if(db.yt) document.getElementById('yt-sec').style.display = 'none';
             if(db.fb) document.getElementById('fb-sec').style.display = 'none';
-
-            localStorage.setItem('panda_db_v4', JSON.stringify(db));
+            localStorage.setItem('panda_v12', JSON.stringify(db));
         }
 
         function nav(page, btnId) {
@@ -168,75 +177,63 @@
             document.getElementById(btnId).classList.add('nav-active');
         }
 
-        function showInstruction() {
-            document.getElementById('instruction-modal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('instruction-modal').style.display = 'none';
-        }
-
-        function startInAppAd() {
-            closeModal();
-            const adUrl = "https://otieu.com/4/10557505"; 
-            document.getElementById('ad-frame').src = adUrl;
+        function startAdProcess() {
+            if(db.ads >= 10) return;
+            document.getElementById('ad-frame').src = "https://otieu.com/4/10557505";
             document.getElementById('ad-overlay').style.display = 'flex';
-            document.getElementById('collect-btn-container').style.display = 'none';
             document.getElementById('timer-display').style.display = 'flex';
-            
+            document.getElementById('collect-btn-container').style.display = 'none';
             let s = 25;
-            let timerEl = document.getElementById('timer-display');
-            timerEl.innerText = s;
-            
             let inter = setInterval(() => {
                 s--;
-                timerEl.innerText = s;
+                document.getElementById('timer-display').innerText = s;
                 if(s <= 0) {
                     clearInterval(inter);
-                    timerEl.style.display = 'none';
+                    document.getElementById('timer-display').style.display = 'none';
                     document.getElementById('collect-btn-container').style.display = 'flex';
-                    tg.HapticFeedback.notificationOccurred('success');
                 }
             }, 1000);
         }
 
-        function collectReward() {
-            db.bal += 5; 
+        function finishAd() {
+            db.bal += 5; db.ads += 1;
             updateUI();
             document.getElementById('ad-overlay').style.display = 'none';
-            document.getElementById('ad-frame').src = "";
-            tg.showAlert("অভিনন্দন! ৫ টাকা যোগ হয়েছে। 🐼");
+            tg.showAlert("অ্যাড বোনাস যোগ হয়েছে!");
         }
 
-        function goSocial(url, type) {
+        function goSocial(url, id) {
             tg.openLink(url);
-            setTimeout(() => { document.getElementById(type + '-claim').style.display = 'block'; }, 8000);
+            setTimeout(() => { document.getElementById(id + '-claim').style.display = 'block'; }, 8000);
         }
 
-        function claimTask(type, amt) {
-            db.bal += amt; 
-            if(type === 'yt') db.yt = true;
-            if(type === 'fb') db.fb = true;
-            updateUI(); 
-            tg.showAlert("টাস্ক বোনাস সফলভাবে জমা হয়েছে!");
+        function claimSocial(type, amt) {
+            db.bal += amt; db[type] = true;
+            updateUI();
+            tg.showAlert("টাস্ক বোনাস সফলভাবে যোগ হয়েছে!");
         }
 
         function copyRef() {
-            let link = "https://t.me/Taka_Incom_Ads_bot?start=panda";
+            let link = "https://t.me/Taka_Incom_Ads_bot?start=" + (tg.initDataUnsafe.user?.id || "user");
             const el = document.createElement('textarea');
-            el.value = link;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
+            el.value = link; document.body.appendChild(el);
+            el.select(); document.execCommand('copy');
             document.body.removeChild(el);
-            tg.showAlert("Panda রেফার লিঙ্ক কপি হয়েছে!");
+            tg.showAlert("রেফার লিঙ্ক কপি হয়েছে!");
+            // টেস্ট করতে চাইলে: db.refs += 1; updateUI();
         }
 
         function handleWithdraw() {
-            let amt = document.getElementById('w-amt').value;
+            let amt = parseFloat(document.getElementById('w-amt').value);
             let phn = document.getElementById('w-phn').value;
-            if(!phn || amt < 500) return tg.showAlert("সঠিক নম্বর দিন এবং ন্যূনতম ৫০০ টাকা উইথড্র করুন।");
-            tg.showAlert("আপনার রিকোয়েস্ট গ্রহণ করা হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
+            if(db.refs < 10) return tg.showAlert("উইথড্র করতে অন্তত ১০ জন রেফার লাগবে!");
+            if(isNaN(amt) || amt < 500) return tg.showAlert("সর্বনিম্ন ৫০০ টাকা উইথড্র করুন।");
+            if(amt > db.bal) return tg.showAlert("পর্যাপ্ত ব্যালেন্স নেই।");
+            if(!phn) return tg.showAlert("অ্যাকাউন্ট নম্বর দিন।");
+            
+            db.bal -= amt;
+            updateUI();
+            tg.showAlert("উইথড্র রিকোয়েস্ট সফল হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
         }
 
         updateUI();
