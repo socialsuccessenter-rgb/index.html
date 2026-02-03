@@ -10,18 +10,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); color: white; overflow: hidden; padding-bottom: 80px; }
         
-        /* Ad & Verify Overlay */
-        #ad-player, #verify-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; }
-        #ad-frame { width: 100%; height: 100%; border: none; }
-        .ui-box { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--primary); color: white; font-weight: bold; }
-        .close-btn { position: absolute; top: 20px; left: 20px; background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; display: none; z-index: 10002; }
-
-        /* Header */
+        /* Header & Balance */
         .header { padding: 20px; text-align: center; background: var(--card); border-bottom: 1px solid #242f3d; }
         .balance-card { background: #1c2733; padding: 15px; border-radius: 15px; border: 1px solid #2b3949; margin-top: 10px; }
         .balance-amount { font-size: 30px; color: var(--accent); font-weight: bold; }
 
-        /* Content */
+        /* Pages */
         .content { padding: 20px; height: calc(100vh - 200px); overflow-y: auto; }
         .page { display: none; }
         .page.active { display: block; }
@@ -29,10 +23,11 @@
         
         .btn { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; background: var(--primary); width: 100%; margin-top: 8px; }
         .btn-check { background: var(--success); display: none; }
+        .btn-yt { background: #ff0000; }
+        .btn-fb { background: #1877f2; }
         
-        /* Form Styling */
-        label { display: block; margin-bottom: 5px; font-size: 13px; color: #8e99a2; text-align: left; }
-        input, select { width: 100%; padding: 12px; background: #0e1621; border: 1px solid #2b3949; color: white; border-radius: 8px; margin-bottom: 15px; outline: none; appearance: none; }
+        input, select { width: 100%; padding: 12px; background: #0e1621; border: 1px solid #2b3949; color: white; border-radius: 8px; margin-bottom: 10px; outline: none; }
+        label { display: block; margin-bottom: 5px; font-size: 13px; color: #8e99a2; }
 
         /* Navigation */
         .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--card); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #242f3d; }
@@ -42,16 +37,10 @@
 </head>
 <body>
 
-    <div id="ad-player">
-        <div class="ui-box">Timer: <span id="timer-count">15</span>s</div>
-        <button id="close-ad-btn" class="close-btn" onclick="finishAd()">Close Ad</button>
-        <iframe id="ad-frame"></iframe>
-    </div>
-
     <div class="header">
         <h3 id="user-name">Welcome</h3>
         <div class="balance-card">
-            <p style="font-size: 13px; color: #8e99a2;">ব্যালেন্স</p>
+            <p style="font-size: 13px; color: #8e99a2;">আপনার ব্যালেন্স</p>
             <div class="balance-amount" id="balance">৳ 0.00</div>
             <p id="stats" style="font-size: 11px; margin-top: 5px; color: #8e99a2;">অ্যাড: 0/10 | রেফার: 0</p>
         </div>
@@ -61,8 +50,8 @@
         <div id="home" class="page active">
             <div class="task-card" style="text-align: center;">
                 <h4 style="color: var(--accent);">Refer & Earn</h4>
-                <p style="margin: 10px 0; font-size: 13px;">প্রতি রেফারে ১০ টাকা! বন্ধুদের ইনভাইট করুন।</p>
-                <button class="btn" onclick="copyRef()">লিঙ্ক কপি করুন</button>
+                <p style="margin: 10px 0; font-size: 13px;">প্রতি রেফারে ১০ টাকা বোনাস পান!</p>
+                <button class="btn" onclick="copyRef()">রেফার লিঙ্ক কপি</button>
             </div>
         </div>
 
@@ -73,45 +62,40 @@
             </div>
             <div class="task-card" id="yt-card">
                 <div style="display:flex; justify-content:space-between"><h4>YouTube Subscribe</h4><b>৳৫০</b></div>
-                <button id="yt-go" class="btn" style="background:#ff0000" onclick="openLink('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe Channel</button>
+                <button id="yt-go" class="btn btn-yt" onclick="openSocialLink('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe Channel</button>
                 <button id="yt-check" class="btn btn-check" onclick="verifyTask('yt', 50)">Check Claim</button>
             </div>
             <div class="task-card" id="fb-card">
-                <div style="display:flex; justify-content:space-between"><h4>FB Page Follow</h4><b>৳৩০</b></div>
-                <button id="fb-go" class="btn" style="background:#1877f2" onclick="openLink('https://www.facebook.com/profile.php?id=61585605224547', 'fb')">Follow Page</button>
+                <div style="display:flex; justify-content:space-between"><h4>FB Follow</h4><b>৳৩০</b></div>
+                <button id="fb-go" class="btn btn-fb" onclick="openSocialLink('https://www.facebook.com/profile.php?id=61585605224547', 'fb')">Follow Page</button>
                 <button id="fb-check" class="btn btn-check" onclick="verifyTask('fb', 30)">Check Claim</button>
             </div>
         </div>
 
         <div id="withdraw" class="page">
             <div class="task-card">
-                <h4 style="margin-bottom: 15px;">উইথড্র রিকোয়েস্ট পাঠান</h4>
-                
-                <label>পেমেন্ট মেথড সিলেক্ট করুন:</label>
+                <h4 style="margin-bottom:15px;">উইথড্র রিকোয়েস্ট</h4>
+                <label>পেমেন্ট মেথড:</label>
                 <select id="method">
                     <option value="">-- মেথড বেছে নিন --</option>
                     <option value="Bkash">বিকাশ (Bkash)</option>
                     <option value="Nagad">নগদ (Nagad)</option>
                     <option value="Rocket">রকেট (Rocket)</option>
                 </select>
-
-                <label>আপনার ফোন নাম্বার:</label>
-                <input type="number" id="phone" placeholder="017XXXXXXXX">
-
+                <label>ফোন নাম্বার:</label>
+                <input type="number" id="phone" placeholder="01XXXXXXXXX">
                 <label>টাকার পরিমাণ (মিনিমাম ৫০০):</label>
                 <input type="number" id="amount" placeholder="৫০০">
-
                 <button class="btn" onclick="withdraw()">সাবমিট করুন</button>
-                <p style="font-size: 11px; color:#8e99a2; margin-top:10px; text-align:center;">পেমেন্ট রিকোয়েস্টের ২৪ ঘণ্টার মধ্যে টাকা পাবেন।</p>
             </div>
         </div>
 
         <div id="support" class="page">
             <div class="task-card" style="text-align: center;">
-                <h4>হেল্প সেন্টার</h4>
-                <button class="btn" onclick="tg.openLink('https://t.me/Red_Chilii_bot')">টেলিগ্রাম সাপোর্ট</button>
-                <button class="btn" style="background:#ff0000" onclick="tg.openLink('https://www.youtube.com/@arshoppingmalls')">ইউটিউব চ্যানেল</button>
-                <button class="btn" style="background:#1877f2" onclick="tg.openLink('https://www.facebook.com/profile.php?id=61585605224547')">ফেইসবুক পেইজ</button>
+                <h4>আমাদের সাপোর্ট টিম</h4>
+                <button class="btn" onclick="tg.openLink('https://t.me/Red_Chilii_bot')">Telegram Support</button>
+                <button class="btn btn-yt" onclick="tg.openLink('https://www.youtube.com/@arshoppingmalls')">YouTube Channel</button>
+                <button class="btn btn-fb" onclick="tg.openLink('https://www.facebook.com/profile.php?id=61585605224547')">Facebook Page</button>
             </div>
         </div>
     </div>
@@ -127,14 +111,14 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        let db = JSON.parse(localStorage.getItem('bot_db_v3')) || { bal: 0, ads: 0, refs: 0, yt: false, fb: false };
+        let db = JSON.parse(localStorage.getItem('bot_db_final_v10')) || { bal: 0, ads: 0, refs: 0, yt: false, fb: false };
 
         function updateUI() {
             document.getElementById('balance').innerText = "৳ " + db.bal.toFixed(2);
             document.getElementById('stats').innerText = "অ্যাড: " + db.ads + "/10 | রেফার: " + db.refs;
             if(db.yt) document.getElementById('yt-card').innerHTML = "<b>YouTube Task: Completed ✅</b>";
             if(db.fb) document.getElementById('fb-card').innerHTML = "<b>Facebook Task: Completed ✅</b>";
-            localStorage.setItem('bot_db_v3', JSON.stringify(db));
+            localStorage.setItem('bot_db_final_v10', JSON.stringify(db));
         }
 
         function showPage(id, el) {
@@ -144,33 +128,48 @@
             el.classList.add('active');
         }
 
+        // Ad System with 15s Timer
         function playAd() {
             if(db.ads >= 10) return alert("আজকের লিমিট শেষ!");
-            document.getElementById('ad-frame').src = "https://otieu.com/4/10557505";
-            document.getElementById('ad-player').style.display = 'flex';
-            let c = 15;
-            let i = setInterval(() => {
-                c--; document.getElementById('timer-count').innerText = c;
-                if(c <= 0) { clearInterval(i); document.getElementById('close-ad-btn').style.display = 'block'; }
+            
+            let adURL = "https://otieu.com/4/10557505";
+            tg.openLink(adURL);
+
+            alert("অ্যাডটি ওপেন হয়েছে। ভেরিফাই আসলে পূরণ করে ১৫ সেকেন্ড অপেক্ষা করুন।");
+
+            let timeLeft = 15;
+            let timer = setInterval(() => {
+                timeLeft--;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    db.bal += 5;
+                    db.ads += 1;
+                    updateUI();
+                    alert("অভিনন্দন! ১৫ সেকেন্ড শেষ হয়েছে এবং ৳৫ যোগ হয়েছে।");
+                }
             }, 1000);
         }
 
-        function finishAd() {
-            document.getElementById('ad-player').style.display = 'none';
-            db.bal += 5; db.ads += 1; updateUI();
+        function openSocialLink(url, type) {
+            tg.openLink(url);
+            document.getElementById(type + '-check').style.display = 'block';
         }
 
-        function openLink(url, type) { tg.openLink(url); document.getElementById(type + '-check').style.display = 'block'; }
-
         function verifyTask(type, reward) {
-            if(!confirm("আপনি কি সাবস্ক্রাইব/ফলো করেছেন?")) return;
+            if(!confirm("আপনি কি কাজটি শেষ করেছেন?")) return;
             alert("ভেরিফাই করা হচ্ছে...");
-            setTimeout(() => { db.bal += reward; if(type === 'yt') db.yt = true; else db.fb = true; updateUI(); alert("৳" + reward + " যোগ হয়েছে!"); }, 5000);
+            setTimeout(() => {
+                db.bal += reward;
+                if(type === 'yt') db.yt = true; else db.fb = true;
+                updateUI();
+                alert("সাফল্য! ৳" + reward + " আপনার ব্যালেন্সে যোগ হয়েছে।");
+            }, 10000);
         }
 
         function copyRef() {
             let link = "https://t.me/Red_Chilii_bot?start=" + (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "user123");
-            navigator.clipboard.writeText(link); alert("রেফার লিঙ্ক কপি হয়েছে!");
+            navigator.clipboard.writeText(link);
+            alert("রেফার লিঙ্ক কপি হয়েছে!");
         }
 
         function withdraw() {
@@ -178,15 +177,14 @@
             let p = document.getElementById('phone').value;
             let a = document.getElementById('amount').value;
 
-            if(!m) alert("অনুগ্রহ করে পেমেন্ট মেথড (বিকাশ/নগদ/রকেট) সিলেক্ট করুন!");
-            else if(p.length < 11) alert("সঠিক ফোন নাম্বার দিন!");
-            else if(a < 500) alert("মিনিমাম ৫০০ টাকা উইথড্র করা যাবে!");
-            else if(db.bal < a) alert("আপনার একাউন্টে পর্যাপ্ত ব্যালেন্স নেই!");
-            else {
-                alert("সাফল্যের সাথে আপনার " + m + " রিকোয়েস্ট জমা হয়েছে!");
-                db.bal -= parseFloat(a);
-                updateUI();
-            }
+            if(!m) return alert("মেথড সিলেক্ট করুন!");
+            if(p.length < 11) return alert("সঠিক নাম্বার দিন!");
+            if(a < 500) return alert("মিনিমাম ৫০০ টাকা!");
+            if(db.bal < a) return alert("ব্যালেন্স পর্যাপ্ত নয়!");
+
+            alert("আপনার " + m + " উইথড্র রিকোয়েস্টটি সফলভাবে জমা হয়েছে।");
+            db.bal -= parseFloat(a);
+            updateUI();
         }
 
         if(tg.initDataUnsafe.user) document.getElementById('user-name').innerText = "Hello, " + tg.initDataUnsafe.user.first_name;
