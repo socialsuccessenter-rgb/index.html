@@ -3,180 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate Ads Bot</title>
+    <title>Earn Bot Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --primary: #0088cc; --bg: #0e1621; --card: #17212b; --accent: #fbbf24; --success: #2ed573; --danger: #ff4757; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); color: white; overflow: hidden; padding-bottom: 80px; }
         
-        /* Full Screen In-App Ad Player */
-        #ad-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; flex-direction: column; }
-        #ad-frame { width: 100%; height: 100%; border: none; flex-grow: 1; }
-        .ad-header { background: #17212b; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .timer-box { color: var(--accent); font-weight: bold; font-size: 16px; border: 1px solid var(--accent); padding: 5px 15px; border-radius: 20px; }
-        .collect-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; animation: pulse 1.5s infinite; }
-        
-        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+        /* Ad Popup Overlay */
+        #ad-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(14, 22, 33, 0.98); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .timer-circle { width: 100px; height: 100px; border: 4px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin-bottom: 20px; color: var(--accent); }
 
-        /* General UI */
-        .header { padding: 25px; text-align: center; background: linear-gradient(to bottom, #1c2733, var(--bg)); }
-        .balance-box { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #242f3d; margin-top: 15px; }
-        .balance-val { font-size: 35px; color: var(--accent); font-weight: bold; }
-        .content { padding: 20px; height: calc(100vh - 220px); overflow-y: auto; }
+        .header { padding: 20px; text-align: center; background: var(--card); border-bottom: 1px solid #242f3d; }
+        .balance-amount { font-size: 35px; color: var(--accent); font-weight: bold; }
+        .content { padding: 20px; height: calc(100vh - 180px); overflow-y: auto; }
         .page { display: none; }
         .page.active { display: block; }
-        .task-card { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #242f3d; transition: 0.3s; }
+        .task-card { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #242f3d; }
         .btn { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; background: var(--primary); width: 100%; margin-top: 10px; }
-        
-        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 80px; background: var(--card); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #242f3d; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--card); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #242f3d; }
         .nav-item { color: #8e99a2; font-size: 11px; text-align: center; flex: 1; cursor: pointer; }
-        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); padding-top: 5px; }
-        textarea, input { width: 100%; padding: 12px; background: #0e1621; border: 1px solid #2b3949; color: white; border-radius: 8px; margin-bottom: 10px; }
+        .nav-item.active { color: var(--primary); }
+        textarea, input { width: 100%; padding: 12px; background: #0e1621; border: 1px solid #2b3949; color: white; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="ad-view">
-        <div class="ad-header">
-            <div id="timer-text" class="timer-box">অপেক্ষা করুন: 15s</div>
-            <button id="collect-btn" class="collect-btn" onclick="rewardUser()">বোনাস কালেক্ট করুন</button>
-        </div>
-        <iframe id="ad-frame" src=""></iframe>
+    <div id="ad-overlay">
+        <div class="timer-circle" id="overlay-timer">15</div>
+        <h3 id="ad-status">বিজ্ঞাপন দেখা হচ্ছে...</h3>
+        <p style="color: #8e99a2; padding: 20px; font-size: 13px;">সতর্কতা: বিজ্ঞাপনটি ব্রাউজারে ওপেন হয়েছে। ১৫ সেকেন্ড পর এখানে ফিরে এসে বোনাস নিন।</p>
+        <button id="collect-btn" class="btn" style="display:none; width: 80%; background: var(--success);" onclick="collectBonus()">বোনাস কালেক্ট করুন</button>
     </div>
 
     <div class="header">
-        <h3 id="user-name">Welcome</h3>
-        <div class="balance-box">
-            <p style="color: #8e99a2; font-size: 13px;">বর্তমান ব্যালেন্স</p>
-            <div class="balance-val" id="balance">৳ 0.00</div>
-        </div>
+        <p style="font-size: 12px; color: #8e99a2;">আপনার মোট ব্যালেন্স</p>
+        <div class="balance-amount" id="main-balance">৳ 0.00</div>
     </div>
 
     <div class="content">
-        <div id="task" class="page active">
+        <div id="task-page" class="page active">
             <div class="task-card">
-                <div style="display:flex; justify-content:space-between"><h4>Premium Ad</h4><b style="color:var(--success)">৳৫</b></div>
-                <button class="btn" onclick="startInAppAd()">অ্যাড দেখুন (ইন-অ্যাপ)</button>
-            </div>
-            
-            <div class="task-card" id="yt-sec">
-                <div style="display:flex; justify-content:space-between"><h4>YouTube Subscription</h4><b style="color:var(--success)">৳৫০</b></div>
-                <p style="font-size: 11px; color:#8e99a2; margin-top:5px;">সাবস্ক্রাইব না করে চেক করলে আইডি ব্যান হবে।</p>
-                <button class="btn" style="background:#ff0000" onclick="handleSocial('https://www.youtube.com/@arshoppingmalls', 'yt')">Subscribe Now</button>
-                <button id="yt-v" class="btn" style="background:var(--accent); color:black; display:none;" onclick="verifyTask('yt', 50)">ভেরিফাই করুন</button>
+                <div style="display:flex; justify-content:space-between"><h4>Direct Ad Task</h4><b>৳৫</b></div>
+                <button class="btn" onclick="startAdFlow()">অ্যাড দেখুন</button>
             </div>
 
-            <div class="task-card" id="fb-sec">
-                <div style="display:flex; justify-content:space-between"><h4>Facebook Follow</h4><b style="color:var(--success)">৳৩০</b></div>
-                <button class="btn" style="background:#1877f2" onclick="handleSocial('https://www.facebook.com/profile.php?id=61585605224547', 'fb')">Follow Page</button>
-                <button id="fb-v" class="btn" style="background:var(--accent); color:black; display:none;" onclick="verifyTask('fb', 30)">ভেরিফাই করুন</button>
-            </div>
-        </div>
-
-        <div id="withdraw" class="page">
-            <div class="task-card">
-                <h4>টাকা উত্তোলন</h4>
-                <p style="font-size: 12px; color:var(--danger); margin: 10px 0;">* সর্বনিম্ন ৫০০ টাকা ও ১০টি রেফার লাগবে।</p>
-                <input type="number" id="w-amount" placeholder="পরিমাণ">
-                <textarea id="w-refs" rows="3" placeholder="আপনার রেফার করা ১০ জনের নাম/আইডি এখানে দিন..."></textarea>
-                <button class="btn" onclick="processWithdraw()">উইথড্র রিকোয়েস্ট পাঠান</button>
-            </div>
-        </div>
-    </div>
-
-    <nav class="nav-bar">
-        <div class="nav-item active" onclick="showPage('task', this)">🎯 Tasks</div>
-        <div class="nav-item" onclick="showPage('withdraw', this)">💰 Withdraw</div>
-    </nav>
-
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // Local Database (এটিকে পরে আপনি আপনার মেইন সার্ভার ডাটাবেজে কানেক্ট করতে পারবেন)
-        let db = JSON.parse(localStorage.getItem('ads_pro_db_v1')) || { balance: 0, yt: false, fb: false };
-
-        function updateUI() {
-            document.getElementById('balance').innerText = "৳ " + db.balance.toFixed(2);
-            if(db.yt) document.getElementById('yt-sec').style.opacity = '0.5';
-            if(db.fb) document.getElementById('fb-sec').style.opacity = '0.5';
-            localStorage.setItem('ads_pro_db_v1', JSON.stringify(db));
-        }
-
-        function showPage(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active');
-        }
-
-        // --- In-App Ad Logic ---
-        function startInAppAd() {
-            const adURL = "https://otieu.com/4/10557505";
-            document.getElementById('ad-frame').src = adURL;
-            document.getElementById('ad-view').style.display = 'flex';
-            document.getElementById('collect-btn').style.display = 'none';
-            document.getElementById('timer-text').style.display = 'block';
-
-            let timeLeft = 15;
-            let adTimer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer-text').innerText = "অপেক্ষা করুন: " + timeLeft + "s";
-                if(timeLeft <= 0) {
-                    clearInterval(adTimer);
-                    document.getElementById('timer-text').style.display = 'none';
-                    document.getElementById('collect-btn').style.display = 'block';
-                }
-            }, 1000);
-        }
-
-        function rewardUser() {
-            db.balance += 5;
-            updateUI();
-            document.getElementById('ad-view').style.display = 'none';
-            document.getElementById('ad-frame').src = "";
-            tg.showConfirm("অভিনন্দন! ৫ টাকা আপনার ব্যালেন্সে যোগ করা হয়েছে।");
-        }
-
-        // --- Social Task Logic with Manual Database Entry Simulation ---
-        function handleSocial(url, type) {
-            tg.openLink(url);
-            // ১০ সেকেন্ড পর ভেরিফাই বাটন আসবে যাতে সে সত্যি ব্রাউজারে যায়
-            setTimeout(() => {
-                document.getElementById(type + '-v').style.display = 'block';
-            }, 10000);
-        }
-
-        function verifyTask(type, reward) {
-            // এখানে ডাটাবেজ চেকিং এর একটি ফেক ডিলে (Delay) রাখা হয়েছে
-            tg.showPopup({
-                title: 'ভেরিফিকেশন',
-                message: 'আপনার সাবস্ক্রিপশন ডাটাবেজে চেক করা হচ্ছে। অনুগ্রহ করে ২ মিনিট পর ব্যালেন্স চেক করুন।',
-                buttons: [{type: 'ok'}]
-            });
-
-            setTimeout(() => {
-                db.balance += reward;
-                if(type === 'yt') db.yt = true; else db.fb = true;
-                updateUI();
-                tg.showAlert("ভেরিফিকেশন সফল! ৳" + reward + " যোগ করা হয়েছে।");
-            }, 5000); // এটি ৫ সেকেন্ড পর অটো টাকা যোগ করে দিচ্ছে, যা আপনি পরে ম্যানুয়ালি চেক করতে পারেন।
-        }
-
-        function processWithdraw() {
-            let amt = document.getElementById('w-amount').value;
-            let refs = document.getElementById('w-refs').value;
-            if(db.balance < 500) return alert("ব্যালেন্স ৫০০ টাকা নেই!");
-            if(refs.length < 20) return alert("দয়া করে আপনার ১০ জন রেফারের ইউজারনেম দিন!");
-            
-            alert("আপনার পেমেন্ট রিকোয়েস্টটি ডাটাবেজে জমা হয়েছে। এডমিন চেক করে ১-১২ ঘণ্টার মধ্যে পেমেন্ট করবে।");
-            db.balance -= parseFloat(amt);
-            updateUI();
-        }
-
-        updateUI();
-        if(tg.initDataUnsafe.user) document.getElementById('user-name').innerText = "হ্যালো, " + tg.initDataUnsafe.user.first_name;
-    </script>
-</body>
-</html>
+            <div class="task-card" id="yt-section">
+                
