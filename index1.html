@@ -4,42 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Microtask Earn</title>
-    
     <script src='https://alwingulla.com/88/p.js'></script> 
-
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding-bottom: 80px; }
-        .page { display: none; padding: 20px; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 70px; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .active-page { display: block; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; transition: 0.3s; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; }
-        .nav-item { text-align: center; font-size: 12px; color: #777; cursor: pointer; flex: 1; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; text-align: center; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        .nav-item { text-align: center; font-size: 11px; color: #888; cursor: pointer; flex: 1; }
         .nav-item.active { color: #3498db; font-weight: bold; }
+        input { width: 90%; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 5px; }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active-page">
         <div class="card">
-            <h2>💰 বর্তমান ব্যালেন্স</h2>
-            <h1 style="color: #2ecc71;"><span id="h_bal">0</span> ৳</h1>
+            <h3>💰 বর্তমান ব্যালেন্স</h3>
+            <h1 style="color: #27ae60;"><span id="h_bal">0</span> ৳</h1>
         </div>
         <div class="card">
-            <h3>ভিডিও দেখে আয়</h3>
-            <button style="background: #e67e22; color: white;" onclick="showMyAd()">📺 ভিডিও অ্যাড (২৳)</button>
+            <p>ভিডিও দেখে আয়</p>
+            <button style="background: #d35400; color: white;" onclick="showMyAd()">📺 ভিডিও অ্যাড (২৳)</button>
         </div>
     </div>
 
     <div id="tasks" class="page">
         <div class="card">
-            <h2>🎯 সোশ্যাল টাস্ক</h2>
-            <button style="background: #3b5998; color: white;" onclick="doT('ফেসবুক', 'https://facebook.com', 5)">👤 ফেসবুক ফলো (৫৳)</button>
-            <button style="background: #ff0000; color: white;" onclick="doT('ইউটিউব', 'https://youtube.com', 5)">📺 ইউটিউব সাবস্ক্রাইব (৫৳)</button>
+            <h2 style="color: #c0392b;">🎯 সোশ্যাল টাস্ক</h2>
+            <button style="background: #2980b9; color: white;" onclick="doT('ফেসবুক', 'https://facebook.com', 5)">👤 ফেসবুক ফলো (৫৳)</button>
+            <button style="background: #c0392b; color: white;" onclick="doT('ইউটিউব', 'https://youtube.com', 5)">📺 ইউটিউব সাবস্ক্রাইব (৫৳)</button>
         </div>
     </div>
 
@@ -47,17 +46,19 @@
         <div class="card">
             <h2>👤 প্রোফাইল</h2>
             <p>আইডি: <span id="u_id">...</span></p>
-            <h3>মোট টাকা: <span id="p_bal">0</span> ৳</h3>
+            <h3>ব্যালেন্স: <span id="p_bal">0</span> ৳</h3>
             <hr>
-            <input type="number" id="amt" placeholder="টাকার পরিমাণ" style="width:80%; padding:10px; margin:5px;">
-            <button style="background: #27ae60; color: white;" onclick="tg.showAlert('মিনিমাম ৭০০৳ লাগবে')">উইথড্র রিকোয়েস্ট</button>
+            <input type="number" id="amt" placeholder="টাকার পরিমাণ">
+            <input type="text" placeholder="বিকাশ/নগদ নম্বর">
+            <button style="background: #2ecc71; color: white;" onclick="tg.showAlert('মিনিমাম ৭০০৳ প্রয়োজন')">উইথড্র দিন</button>
         </div>
     </div>
 
     <div id="support" class="page">
         <div class="card">
-            <h2>💬 সাপোর্ট সেন্টার</h2>
-            <button style="background: #0088cc; color: white;" onclick="window.open('https://t.me/microtask_earnmoney', '_blank')">টেলিগ্রাম চ্যানেল</button>
+            <h2>💬 সাপোর্ট</h2>
+            <p>যেকোনো সমস্যার জন্য টেলিগ্রামে যোগাযোগ করুন।</p>
+            <button style="background: #3498db; color: white;" onclick="window.open('https://t.me/microtask_earnmoney', '_blank')">টেলিগ্রাম চ্যানেল</button>
         </div>
     </div>
 
@@ -69,10 +70,7 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // ফায়ারবেস কনফিগ (এটি একদম সঠিক আছে)
+        const tg = window.Telegram.WebApp; tg.expand();
         const firebaseConfig = {
             apiKey: "AIzaSyDwjqWl4Qto-n06g2SVGlf4IKKArRnAKBQ",
             databaseURL: "https://earnmoneybot-8836f-default-rtdb.firebaseio.com",
@@ -83,51 +81,34 @@
         const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "test_user";
         document.getElementById('u_id').innerText = uid;
 
-        let currentBal = 0;
-        // ডাটাবেস থেকে রিয়েল-টাইম ডাটা আনা
-        db.ref('users/' + uid).on('value', (snapshot) => {
-            const data = snapshot.val();
-            currentBal = (data && data.balance) ? data.balance : 0;
-            document.getElementById('h_bal').innerText = currentBal;
-            document.getElementById('p_bal').innerText = currentBal;
+        let bal = 0;
+        db.ref('users/' + uid).on('value', (s) => {
+            const d = s.val(); bal = (d && d.balance) ? d.balance : 0;
+            document.getElementById('h_bal').innerText = bal;
+            document.getElementById('p_bal').innerText = bal;
         });
 
-        // অ্যাড দেখানোর ফাংশন
         function showMyAd() {
             if (typeof show_10561349 === 'function') {
-                show_10561349().then(() => {
-                    updateBalance(2, "অ্যাড");
-                }).catch(() => tg.showAlert("অ্যাড লোড হতে পারেনি"));
-            } else {
-                tg.showAlert("অ্যাড এখনও প্রস্তুত নয়, কিছুক্ষণ পর চেষ্টা করুন।");
-            }
+                show_10561349().then(() => uB(2, "অ্যাড"));
+            } else { tg.showAlert("অ্যাড প্রস্তুত নয়"); }
         }
 
-        // সোশ্যাল টাস্ক ফাংশন
-        function doT(name, url, reward) {
-            window.open(url, '_blank');
-            tg.showAlert(name + " টাস্কটি পূর্ণ করুন। ১৫ সেকেন্ড পর টাকা যোগ হবে।");
-            setTimeout(() => {
-                updateBalance(reward, name);
-            }, 15000);
+        function doT(n, u, r) {
+            window.open(u, '_blank');
+            tg.showAlert("টাস্ক শুরু হয়েছে। ১৫ সেকেন্ড পর টাকা যোগ হবে।");
+            setTimeout(() => uB(r, n), 15000);
         }
 
-        // টাকা আপডেট করার মেইন ফাংশন
-        function updateBalance(amount, taskName) {
-            db.ref('users/' + uid).update({
-                balance: currentBal + amount
-            }).then(() => {
-                tg.showAlert("সফল! " + taskName + " এর জন্য " + amount + "৳ যোগ হয়েছে।");
-            }).catch((e) => {
-                tg.showAlert("ভুল হয়েছে: " + e.message);
-            });
+        function uB(a, t) {
+            db.ref('users/' + uid).update({ balance: bal + a })
+            .then(() => tg.showAlert("অভিনন্দন! " + t + " এর জন্য " + a + "৳ যোগ হয়েছে।"));
         }
 
-        function sP(pId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(pId).classList.add('active-page');
-            el.classList.add('active');
+        function sP(p, e) {
+            document.querySelectorAll('.page').forEach(x => x.classList.remove('active-page'));
+            document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+            document.getElementById(p).classList.add('active-page'); e.classList.add('active');
         }
     </script>
 </body>
