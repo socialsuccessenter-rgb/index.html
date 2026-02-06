@@ -36,27 +36,28 @@
 
     <div id="tasks" class="page">
         <div class="card">
-            <h2 style="color: #c0392b;">🎯 সোশ্যাল টাস্ক</h2>
-            <button style="background: #2980b9; color: white;" onclick="doT('ফেসবুক', 'https://facebook.com', 5)">👤 ফেসবুক ফলো (৫৳)</button>
-            <button style="background: #c0392b; color: white;" onclick="doT('ইউটিউব', 'https://youtube.com', 5)">📺 ইউটিউব সাবস্ক্রাইব (৫৳)</button>
+            <h2 style="color: #2980b9;">🎯 সোশ্যাল টাস্ক</h2>
+            <p>টাস্ক পূরণ করে টাকা আয় করুন</p>
+            <button style="background: #3b5998; color: white;" onclick="doT('ফেসবুক', 'https://facebook.com', 5)">👤 ফেসবুক ফলো (৫৳)</button>
         </div>
     </div>
 
     <div id="profile" class="page">
         <div class="card">
             <h2>👤 প্রোফাইল</h2>
-            <p>আইডি: <span id="u_id">...</span></p>
-            <h3>ব্যালেন্স: <span id="p_bal">0</span> ৳</h3>
+            <p>ইউজার আইডি: <span id="u_id">...</span></p>
+            <h3>মোট আয়: <span id="p_bal">0</span> ৳</h3>
             <hr>
+            <h4>টাকা উত্তোলন</h4>
             <input type="number" id="amt" placeholder="টাকার পরিমাণ">
             <input type="text" placeholder="বিকাশ/নগদ নম্বর">
-            <button style="background: #2ecc71; color: white;" onclick="tg.showAlert('মিনিমাম ৭০০৳ প্রয়োজন')">উইথড্র দিন</button>
+            <button style="background: #2ecc71; color: white;" onclick="tg.showAlert('উইথড্রর জন্য কমপক্ষে ৭০০৳ লাগবে।')">উইথড্র দিন</button>
         </div>
     </div>
 
     <div id="support" class="page">
         <div class="card">
-            <h2>💬 সাপোর্ট</h2>
+            <h2>💬 সাপোর্ট সেন্টার</h2>
             <p>যেকোনো সমস্যার জন্য টেলিগ্রামে যোগাযোগ করুন।</p>
             <button style="background: #3498db; color: white;" onclick="window.open('https://t.me/microtask_earnmoney', '_blank')">টেলিগ্রাম চ্যানেল</button>
         </div>
@@ -70,7 +71,10 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp; tg.expand();
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             apiKey: "AIzaSyDwjqWl4Qto-n06g2SVGlf4IKKArRnAKBQ",
             databaseURL: "https://earnmoneybot-8836f-default-rtdb.firebaseio.com",
@@ -78,37 +82,60 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        // ইউজার আইডি সেট করা
         const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "test_user";
         document.getElementById('u_id').innerText = uid;
 
         let bal = 0;
+
+        // ডাটাবেস থেকে রিয়েল-টাইম ব্যালেন্স চেক
         db.ref('users/' + uid).on('value', (s) => {
-            const d = s.val(); bal = (d && d.balance) ? d.balance : 0;
+            const d = s.val();
+            bal = (d && d.balance) ? d.balance : 0;
             document.getElementById('h_bal').innerText = bal;
             document.getElementById('p_bal').innerText = bal;
         });
 
+        // মনিট্যাগ অ্যাড ফাংশন
         function showMyAd() {
             if (typeof show_10561349 === 'function') {
-                show_10561349().then(() => uB(2, "অ্যাড"));
-            } else { tg.showAlert("অ্যাড প্রস্তুত নয়"); }
+                show_10561349().then(() => {
+                    uB(2, "ভিডিও অ্যাড");
+                }).catch(() => {
+                    tg.showAlert("অ্যাড লোড হতে পারেনি, আবার চেষ্টা করুন।");
+                });
+            } else {
+                tg.showAlert("অ্যাড সার্ভিস এখনও প্রস্তুত নয়।");
+            }
         }
 
+        // টাস্ক ফাংশন
         function doT(n, u, r) {
             window.open(u, '_blank');
-            tg.showAlert("টাস্ক শুরু হয়েছে। ১৫ সেকেন্ড পর টাকা যোগ হবে।");
-            setTimeout(() => uB(r, n), 15000);
+            tg.showAlert(n + " টাস্ক শুরু হয়েছে। ১৫ সেকেন্ড পর টাকা যোগ হবে।");
+            setTimeout(() => {
+                uB(r, n);
+            }, 15000);
         }
 
-        function uB(a, t) {
-            db.ref('users/' + uid).update({ balance: bal + a })
-            .then(() => tg.showAlert("অভিনন্দন! " + t + " এর জন্য " + a + "৳ যোগ হয়েছে।"));
+        // ব্যালেন্স আপডেট করার মেইন ফাংশন
+        function uB(amount, taskName) {
+            db.ref('users/' + uid).update({
+                balance: bal + amount
+            }).then(() => {
+                tg.showAlert("অভিনন্দন! " + taskName + " এর জন্য " + amount + "৳ যোগ হয়েছে।");
+            }).catch((e) => {
+                tg.showAlert("ত্রুটি: " + e.message);
+            });
         }
 
+        // পেজ সুইচ করার ফাংশন
         function sP(p, e) {
             document.querySelectorAll('.page').forEach(x => x.classList.remove('active-page'));
             document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-            document.getElementById(p).classList.add('active-page'); e.classList.add('active');
+            document.getElementById(p).classList.add('active-page');
+            e.classList.add('active');
         }
     </script>
 </body>
