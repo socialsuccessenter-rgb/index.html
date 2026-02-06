@@ -9,11 +9,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding-bottom: 70px; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 70px; }
         .page { display: none; padding: 20px; }
         .active-page { display: block; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; background: #e67e22; color: white; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; background: #e67e22; color: white; }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; }
         .nav-item { text-align: center; font-size: 12px; color: #777; cursor: pointer; flex: 1; }
         .nav-item.active { color: #3498db; font-weight: bold; }
@@ -35,8 +35,7 @@
     </div>
     <div class="bottom-nav">
         <div class="nav-item active" onclick="sP('home', this)">🏠 হোম</div>
-        <div class="nav-item" onclick="index_task_nav()" onclick="sP('tasks', this)">📋 টাস্ক</div>
-        <div id="nav_task" class="nav-item" onclick="sP('tasks', this)">📋 টাস্ক</div>
+        <div class="nav-item" onclick="sP('tasks', this)">📋 টাস্ক</div>
         <div class="nav-item" onclick="sP('profile', this)">👤 প্রোফাইল</div>
         <div class="nav-item" onclick="sP('support', this)">💬 সাপোর্ট</div>
     </div>
@@ -54,7 +53,7 @@
         });
         function showMyAd() { if (typeof show_10561349 === 'function') { show_10561349().then(() => uB(2, "অ্যাড")); } else { tg.showAlert("অ্যাড প্রস্তুত নয়"); } }
         function doT(n, u, r) { window.open(u, '_blank'); setTimeout(() => uB(r, n), 15000); }
-        function uB(a, t) { db.ref('users/' + uid).update({ balance: bal + a }).then(() => tg.showAlert(t + " এর টাকা যোগ হয়েছে!")); }
+        function uB(a, t) { db.ref('users/' + uid).update({ balance: bal + a }).then(() => tg.showAlert(t + " সফল!")); }
         function sP(p, e) { document.querySelectorAll('.page').forEach(x => x.classList.remove('active-page')); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); document.getElementById(p).classList.add('active-page'); e.classList.add('active'); }
     </script>
 </body>
