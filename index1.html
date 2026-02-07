@@ -16,7 +16,7 @@
         .nav-item { text-align: center; font-size: 12px; color: #888; cursor: pointer; flex: 1; }
         .nav-item.active { color: #3498db; font-weight: bold; }
         .lock-status { color: #e74c3c; font-size: 13px; margin-top: 10px; font-weight: bold; }
-        input { width: 90%; padding: 12px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; color: #34495e; }
+        input { width: 90%; padding: 12px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: #eee; }
     </style>
 </head>
 <body>
@@ -27,38 +27,36 @@
             <h1 style="color: #27ae60;"><span id="bal_text">0</span> ৳</h1>
         </div>
         <div class="card">
-            <p>অ্যাড দেখে আয়</p>
             <button style="background: #e67e22; color: white;" onclick="showMyAd()">📺 ভিডিও অ্যাড (২৳)</button>
         </div>
     </div>
 
     <div id="tasks" class="page">
         <div class="card">
-            <h2 style="color: #2980b9;">🎯 সোশ্যাল টাস্ক</h2>
+            <h2>🎯 সোশ্যাল টাস্ক</h2>
             <button style="background: #3b5998; color: white;" onclick="doT('ফেসবুক', 'https://facebook.com', 5)">👤 ফেসবুক ফলো (৫৳)</button>
         </div>
     </div>
 
     <div id="profile" class="page">
         <div class="card">
-            <h2>👤 ইউজার ডাটা</h2>
+            <h2>👤 প্রোফাইল</h2>
             <p>রেফার সংখ্যা: <b style="color:#3498db;"><span id="ref_count">0</span>/১০</b></p>
             <div id="lock_msg" class="lock-status">উইথড্র করতে ১০টি রেফার লাগবে</div>
             <hr>
             <p>আপনার রেফার লিংক:</p>
-            <input type="text" id="ref_url" readonly placeholder="লিংক তৈরি হচ্ছে...">
+            <input type="text" id="ref_url" readonly>
             <button style="background: #9b59b6; color: white;" onclick="copyRef()">🔗 লিংক কপি করুন</button>
         </div>
         <div class="card">
             <h4>টাকা উত্তোলন</h4>
-            <p style="font-size: 12px; color: #7f8c8d;">মিনিমাম উত্তোলন: ৭০০ ৳</p>
-            <button id="withdraw_btn" style="background: #bdc3c7; color: white;" disabled onclick="requestWithdraw()">💸 উইথড্র দিন</button>
+            <p style="font-size: 12px;">মিনিমাম উত্তোলন: ৭০০ ৳</p>
+            <button id="withdraw_btn" style="background: #bdc3c7; color: white;" disabled onclick="tg.showAlert('অনুরোধ পাঠানো হয়েছে!')">💸 উইথড্র দিন</button>
         </div>
     </div>
 
     <div id="support" class="page">
         <div class="card">
-            <h2>💬 সাপোর্ট সেন্টার</h2>
             <button style="background: #0088cc; color: white;" onclick="window.open('https://t.me/microtask_earnmoney')">টেলিগ্রাম চ্যানেল</button>
         </div>
     </div>
@@ -74,37 +72,27 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ইউজার আইডি এবং ডাটা লোড
-        const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "123456";
+        const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "12345";
         let balance = parseFloat(localStorage.getItem('my_bal')) || 0;
         let refs = parseInt(localStorage.getItem('my_refs')) || 0;
 
         function updateUI() {
             document.getElementById('bal_text').innerText = balance;
             document.getElementById('ref_count').innerText = refs;
-            
-            // রেফার লিংক তৈরি (আপনার বটের ইউজারনেম দিয়ে)
+            // আপনার বটের সঠিক ইউজারনেম দিয়ে লিংক
             document.getElementById('ref_url').value = "https://t.me/microtask_earnmoney_bot?start=" + uid;
 
             const btn = document.getElementById('withdraw_btn');
             const msg = document.getElementById('lock_msg');
 
-            // ১০ রেফার এবং ৭০০ টাকার শর্ত চেক
             if(refs >= 10 && balance >= 700) {
                 btn.disabled = false;
                 btn.style.background = "#2ecc71";
                 msg.innerText = "উইথড্র অপশন আনলক হয়েছে!";
                 msg.style.color = "#27ae60";
             } else if (refs >= 10 && balance < 700) {
-                btn.disabled = true;
-                btn.style.background = "#bdc3c7";
-                msg.innerText = "ব্যালেন্স ৭০০৳ হলে উইথড্র দিতে পারবেন";
+                msg.innerText = "ব্যালেন্স ৭০০৳ হলে বাটন খুলবে";
                 msg.style.color = "#f39c12";
-            } else {
-                btn.disabled = true;
-                btn.style.background = "#bdc3c7";
-                msg.innerText = "উইথড্র করতে ১০টি রেফার লাগবে";
-                msg.style.color = "#e74c3c";
             }
         }
 
@@ -118,25 +106,20 @@
         function showMyAd() {
             if (typeof show_10561349 === 'function') {
                 show_10561349().then(() => saveMoney(2));
-            } else { tg.showAlert("অ্যাড এখনও প্রস্তুত নয়।"); }
+            } else { tg.showAlert("অ্যাড লোড হচ্ছে..."); }
         }
 
         function doT(n, u, r) {
             window.open(u, '_blank');
-            tg.showAlert("টাস্ক শুরু হয়েছে। ১৫ সেকেন্ড পর টাকা যোগ হবে।");
-            setTimeout(() => saveMoney(r), 15000);
+            setTimeout(() => saveMoney(r), 10000);
         }
 
         function copyRef() {
             const copyText = document.getElementById("ref_url");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); // মোবাইল ফোনের জন্য
+            copyText.setSelectionRange(0, 99999);
             document.execCommand("copy");
-            tg.showAlert("রেফার লিংক কপি হয়েছে!");
-        }
-
-        function requestWithdraw() {
-            tg.showAlert("আপনার উইথড্র রিকোয়েস্ট গ্রহণ করা হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
+            tg.showAlert("লিংক কপি হয়েছে!");
         }
 
         function sP(p, e) {
